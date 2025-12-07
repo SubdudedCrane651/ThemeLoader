@@ -11,6 +11,10 @@
 
     <!-- Windows-specific settings -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+	
+	<!-- Add this line -->
+  <ApplicationId>com.maui.ThemeLoader</ApplicationId>
+
   </PropertyGroup>
 
   <ItemGroup>
