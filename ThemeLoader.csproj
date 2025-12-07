@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- Dual targeting: Windows + MacCatalyst -->
-    <TargetFrameworks>net8.0-windows10.0.19041.0;net8.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows10.0.19041.0;net8.0-maccatalyst17.0</TargetFrameworks>
 
     <!-- Required for MAUI single-project -->
     <OutputType>Exe</OutputType>
