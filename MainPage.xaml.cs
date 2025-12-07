@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Maui.Storage;
 #if MACCATALYST
 using AppKit;
 using Foundation;
@@ -15,7 +16,10 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
-        IntervalSlider.ValueChanged += (_, e) => IntervalLabel.Text = ((int)e.NewValue).ToString();
+        IntervalSlider.ValueChanged += (_, e) =>
+        {
+            IntervalLabel.Text = ((int)e.NewValue).ToString();
+        };
     }
 
     async void OnBrowseClicked(object sender, EventArgs e)
@@ -23,7 +27,13 @@ public partial class MainPage : ContentPage
         var result = await FilePicker.PickAsync(new PickOptions
         {
             PickerTitle = "Select theme.json",
-            FileTypes = FilePickerFileType.Json
+            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+            {
+                { DevicePlatform.MacCatalyst, new[] { "public.json" } },
+                { DevicePlatform.iOS, new[] { "public.json" } },
+                { DevicePlatform.WinUI, new[] { ".json" } },
+                { DevicePlatform.Android, new[] { "application/json" } }
+            })
         });
 
         if (result == null) return;
@@ -117,31 +127,18 @@ public partial class MainPage : ContentPage
     }
 
 #if MACCATALYST
-    void ApplyDesktopImage(string fullPath)
-    {
-        var ws = NSWorkspace.SharedWorkspace;
-        var screen = NSScreen.MainScreen;
-        var url = NSUrl.FromFilename(fullPath);
-        ws.SetDesktopImageUrl(url, screen, new NSDictionary());
-    }
-#endif
-}
-
-// Simple file type constraint for FilePicker
-public static class FilePickerFileType
+void ApplyDesktopImage(string fullPath)
 {
-    public static FilePickerFileType Json => new(new Dictionary<DevicePlatform, IEnumerable<string>>
-    {
-        { DevicePlatform.MacCatalyst, new[] { "public.json" } },
-        { DevicePlatform.iOS, new[] { "public.json" } },
-        { DevicePlatform.WinUI, new[] { ".json" } },
-        { DevicePlatform.Android, new[] { "application/json" } },
-        { DevicePlatform.TvOS, new[] { "public.json" } }
-    });
+    var ws = NSWorkspace.SharedWorkspace;
+    var screen = NSScreen.MainScreen;
+    var url = NSUrl.FromFilename(fullPath);
+    ws.SetDesktopImageUrl(url, screen, new NSDictionary());
 }
+#endif
+}   
 
-// Shared model
-public class ThemeModel
+    // Shared model
+    public class ThemeModel
 {
     public string DisplayName { get; set; } = "Theme";
     public List<string> Wallpapers { get; set; } = new();
