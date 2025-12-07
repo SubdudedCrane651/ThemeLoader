@@ -1,9 +1,11 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Devices;
+using Microsoft.Maui.Dispatching;
 using Microsoft.Maui.Storage;
-#if MACCATALYST
-using AppKit;
-using Foundation;
-#endif
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
 namespace ThemeLoader;
 
@@ -12,13 +14,14 @@ public partial class MainPage : ContentPage
     ThemeModel? _model;
     string? _baseFolder;
     IDispatcherTimer? _timer;
+    int _index = 0;
 
     public MainPage()
     {
         InitializeComponent();
         IntervalSlider.ValueChanged += (_, e) =>
         {
-            IntervalLabel.Text = ((int)e.NewValue).ToString();
+            IntervalLabel.Text = $"{(int)e.NewValue}s";
         };
     }
 
@@ -30,115 +33,60 @@ public partial class MainPage : ContentPage
             FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
             {
                 { DevicePlatform.MacCatalyst, new[] { "public.json" } },
-                { DevicePlatform.iOS, new[] { "public.json" } },
-                { DevicePlatform.WinUI, new[] { ".json" } },
-                { DevicePlatform.Android, new[] { "application/json" } }
+                { DevicePlatform.WinUI, new[] { ".json" } }
             })
         });
 
         if (result == null) return;
 
-        JsonPathEntry.Text = result.FullPath;
         _baseFolder = Path.GetDirectoryName(result.FullPath);
-        WallpapersFolderEntry.Text = Path.Combine(_baseFolder!, "wallpapers");
 
         try
         {
             var json = File.ReadAllText(result.FullPath);
             _model = JsonSerializer.Deserialize<ThemeModel>(json);
 
-            StatusLabel.Text = _model == null
-                ? "Failed to parse theme.json"
-                : $"Loaded theme: {_model.DisplayName} ({_model.Wallpapers?.Count ?? 0} wallpapers)";
+            if (_model != null)
+                await DisplayAlert("Theme Loaded", $"Loaded {_model.DisplayName} with {_model.Wallpapers.Count} wallpapers.", "OK");
         }
         catch (Exception ex)
         {
-            StatusLabel.Text = $"Error reading theme.json: {ex.Message}";
+            await DisplayAlert("Error", $"Failed to read theme.json: {ex.Message}", "OK");
         }
-    }
-
-    void OnApplyOnceClicked(object sender, EventArgs e)
-    {
-#if MACCATALYST
-        if (!EnsureModel()) return;
-
-        var last = _model!.Wallpapers.LastOrDefault();
-        if (last == null) { StatusLabel.Text = "No wallpapers found."; return; }
-
-        var full = Path.Combine(_baseFolder!, last);
-        if (!File.Exists(full)) { StatusLabel.Text = "Wallpaper file not found."; return; }
-
-        ApplyDesktopImage(full);
-        StatusLabel.Text = $"Applied: {Path.GetFileName(full)}";
-#else
-        StatusLabel.Text = "This action is only supported on MacCatalyst.";
-#endif
     }
 
     void OnStartSlideshowClicked(object sender, EventArgs e)
     {
-#if MACCATALYST
-        if (!EnsureModel()) return;
+        if (_model == null || string.IsNullOrEmpty(_baseFolder)) return;
 
-        var seconds = (int)IntervalSlider.Value;
         _timer?.Stop();
+        _index = 0;
 
         _timer = Dispatcher.CreateTimer();
-        _timer.Interval = TimeSpan.FromSeconds(seconds);
-
-        int index = 0;
+        _timer.Interval = TimeSpan.FromSeconds((int)IntervalSlider.Value);
         _timer.Tick += (_, __) =>
         {
             if (_model!.Wallpapers.Count == 0) return;
 
-            var rel = _model.Wallpapers[index % _model.Wallpapers.Count];
+            var rel = _model.Wallpapers[_index % _model.Wallpapers.Count];
             var full = Path.Combine(_baseFolder!, rel);
 
             if (File.Exists(full))
-            {
-                ApplyDesktopImage(full);
-                StatusLabel.Text = $"Slideshow: {Path.GetFileName(full)}";
-            }
+                WallpaperImage.Source = ImageSource.FromFile(full);
 
-            index++;
+            _index++;
         };
 
         _timer.Start();
-        StatusLabel.Text = $"Slideshow started (every {seconds}s)";
-#else
-        StatusLabel.Text = "This action is only supported on MacCatalyst.";
-#endif
     }
 
     void OnStopSlideshowClicked(object sender, EventArgs e)
     {
         _timer?.Stop();
-        StatusLabel.Text = "Slideshow stopped.";
     }
-
-    bool EnsureModel()
-    {
-        if (_model == null || string.IsNullOrEmpty(_baseFolder))
-        {
-            StatusLabel.Text = "Load theme.json first.";
-            return false;
-        }
-        return true;
-    }
-
-#if MACCATALYST
-void ApplyDesktopImage(string fullPath)
-{
-    var ws = NSWorkspace.SharedWorkspace;
-    var screen = NSScreen.MainScreen;
-    var url = NSUrl.FromFilename(fullPath);
-    ws.SetDesktopImageUrl(url, screen, new NSDictionary());
 }
-#endif
-}   
 
-    // Shared model
-    public class ThemeModel
+public class ThemeModel
 {
     public string DisplayName { get; set; } = "Theme";
     public List<string> Wallpapers { get; set; } = new();

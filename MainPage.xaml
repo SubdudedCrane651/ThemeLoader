@@ -1,78 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ThemeLoader.MainPage"
-             Title="Mac Theme Loader">
+             BackgroundColor="Black">
 
-    <ContentPage.Resources>
-        <Style TargetType="Frame">
-            <Setter Property="Padding" Value="16" />
-            <Setter Property="CornerRadius" Value="12" />
-            <Setter Property="BackgroundColor" Value="{StaticResource CardBackground}" />
-            <Setter Property="BorderColor" Value="{StaticResource BorderColor}" />
-        </Style>
-    </ContentPage.Resources>
+    <Grid RowDefinitions="Auto,*">
+        <!-- Controls -->
+        <StackLayout Orientation="Horizontal" Padding="10" Spacing="10">
+            <Button Text="Browse theme.json" Clicked="OnBrowseClicked"/>
+            <Button Text="Start Slideshow" Clicked="OnStartSlideshowClicked"/>
+            <Button Text="Stop Slideshow" Clicked="OnStopSlideshowClicked"/>
+            <Slider x:Name="IntervalSlider" Minimum="5" Maximum="60" Value="30" WidthRequest="150"/>
+            <Label x:Name="IntervalLabel" Text="30s" TextColor="White"/>
+        </StackLayout>
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="16" Padding="24">
-
-            <Label Text="Apply Wallpapers from theme.json"
-             FontSize="22"
-             FontAttributes="Bold" />
-
-            <Frame>
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="Theme JSON path"
-                 TextColor="{StaticResource SubTextColor}" />
-                    <HorizontalStackLayout Spacing="10">
-                        <Entry x:Name="JsonPathEntry"
-                   Placeholder="Choose or paste the path to theme.json"
-                   HorizontalOptions="FillAndExpand" />
-                        <Button Text="Browse"
-                    x:Name="BrowseButton"
-                    Clicked="OnBrowseClicked" />
-                    </HorizontalStackLayout>
-
-                    <Label Text="Wallpapers folder (auto-resolved)"
-                 TextColor="{StaticResource SubTextColor}" />
-                    <Entry x:Name="WallpapersFolderEntry"
-                 IsReadOnly="True"
-                 Placeholder="Will populate after selecting theme.json" />
-                </VerticalStackLayout>
-            </Frame>
-
-            <Frame>
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="Controls" FontAttributes="Bold" />
-                    <HorizontalStackLayout Spacing="10">
-                        <Button Text="Apply last wallpaper"
-                    x:Name="ApplyOnceButton"
-                    Clicked="OnApplyOnceClicked" />
-                        <Button Text="Start slideshow"
-                    x:Name="StartSlideshowButton"
-                    Clicked="OnStartSlideshowClicked" />
-                        <Button Text="Stop slideshow"
-                    x:Name="StopSlideshowButton"
-                    Clicked="OnStopSlideshowClicked" />
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                        <Label Text="Interval (seconds)" />
-                        <Slider x:Name="IntervalSlider" Minimum="5" Maximum="300" Value="30" WidthRequest="200" />
-                        <Label x:Name="IntervalLabel" Text="30" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-            <Frame>
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="Status" FontAttributes="Bold" />
-                    <Label x:Name="StatusLabel"
-                 Text="Idle"
-                 LineBreakMode="WordWrap" />
-                </VerticalStackLayout>
-            </Frame>
-
-        </VerticalStackLayout>
-    </ScrollView>
+        <!-- Wallpaper viewer -->
+        <Image x:Name="WallpaperImage"
+               Grid.Row="1"
+               Aspect="AspectFill"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill"/>
+    </Grid>
 </ContentPage>
