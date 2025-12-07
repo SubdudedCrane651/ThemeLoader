@@ -2,7 +2,7 @@
 using UIKit;
 using Foundation;
 using UniformTypeIdentifiers;
-using ThemeLoader.Services; // your shared interface namespace
+using ThemeLoader.Services; // shared interface namespace
 
 namespace ThemeLoader.Platforms.MacCatalyst;
 
@@ -12,24 +12,22 @@ public class FilePickerService : IFilePickerService
     {
         var tcs = new TaskCompletionSource<string?>();
 
-        // Use UTType.Content if no specific types are passed
+        // Replace UTType.Json.Identifier with the public identifier for JSON files
         var picker = new UIDocumentPickerViewController(
-            allowedTypes ?? new string[] { UTType.SHSignatureContentType.Identifier },
+            allowedTypes ?? new string[] { "public.json" },
             UIDocumentPickerMode.Import);
 
-        // Handle selection
         picker.DidPickDocument += (sender, e) =>
         {
             tcs.TrySetResult(e.Url?.Path);
         };
 
-        // Handle cancel
         picker.WasCancelled += (sender, e) =>
         {
             tcs.TrySetResult(null);
         };
 
-        // Present on the active scene’s root controller
+        // Present from the active UIWindowScene
         var root = UIApplication.SharedApplication
             .ConnectedScenes
             .OfType<UIWindowScene>()

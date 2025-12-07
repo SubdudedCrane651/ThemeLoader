@@ -1,14 +1,10 @@
-﻿using Microsoft.Maui.Controls;
+﻿namespace ThemeLoader;
 
-namespace ThemeLoader
+public partial class App : Application
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            InitializeComponent();
-
-            MainPage = new AppShell();
-        }
+        InitializeComponent();
+        MainPage = new AppShell(); // or new MainPage()
     }
 }
