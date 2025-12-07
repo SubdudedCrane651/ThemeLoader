@@ -16,12 +16,20 @@
   <ApplicationId>com.maui.ThemeLoader</ApplicationId>
 
   </PropertyGroup>
+  
+  	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
+	  <ApplicationId>com.maui.scrapbookapp</ApplicationId>
+	</PropertyGroup>
+	
+<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">
+	  <ApplicationId>com.maui.scrapbookapp</ApplicationId>
+	</PropertyGroup>	
 
   <ItemGroup>
-    <!-- MAUI essentials -->
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.*" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.*" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
+	</ItemGroup>
 
   <ItemGroup>
     <!-- Include all XAML and C# files -->
