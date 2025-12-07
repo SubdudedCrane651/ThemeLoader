@@ -1,4 +1,6 @@
-﻿namespace ThemeLoader
+﻿using Microsoft.Maui.Controls;
+
+namespace ThemeLoader
 {
     public partial class App : Application
     {

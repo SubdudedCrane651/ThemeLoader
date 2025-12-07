@@ -1,4 +1,6 @@
 ﻿using Foundation;
+using Microsoft.Maui; // Add this using directive
+using Microsoft.Maui.Hosting; // Add this using directive
 
 namespace ThemeLoader
 {

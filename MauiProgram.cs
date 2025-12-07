@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Maui; // Add this using directive
+using Microsoft.Maui.Controls.Hosting;
+using Microsoft.Maui.Hosting; // Add this using directive
 
 namespace ThemeLoader
 {
@@ -14,10 +17,6 @@ namespace ThemeLoader
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
 
             return builder.Build();
         }
