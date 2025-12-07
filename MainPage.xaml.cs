@@ -1,11 +1,10 @@
 ﻿using Microsoft.Maui.Controls;
-using Microsoft.Maui.Devices;
 using Microsoft.Maui.Dispatching;
-using Microsoft.Maui.Storage;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using ThemeLoader.Services;
 
 namespace ThemeLoader;
 
@@ -15,10 +14,13 @@ public partial class MainPage : ContentPage
     string? _baseFolder;
     IDispatcherTimer? _timer;
     int _index = 0;
+    readonly IFilePickerService _filePicker;
 
-    public MainPage()
+    public MainPage(IFilePickerService filePicker)
     {
         InitializeComponent();
+        _filePicker = filePicker;
+
         IntervalSlider.ValueChanged += (_, e) =>
         {
             IntervalLabel.Text = $"{(int)e.NewValue}s";
@@ -27,27 +29,20 @@ public partial class MainPage : ContentPage
 
     async void OnBrowseClicked(object sender, EventArgs e)
     {
-        var result = await FilePicker.PickAsync(new PickOptions
-        {
-            PickerTitle = "Select theme.json",
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.MacCatalyst, new[] { "public.json" } },
-                { DevicePlatform.WinUI, new[] { ".json" } }
-            })
-        });
+        var path = await _filePicker.PickFileAsync();
+        if (string.IsNullOrEmpty(path)) return;
 
-        if (result == null) return;
-
-        _baseFolder = Path.GetDirectoryName(result.FullPath);
+        _baseFolder = Path.GetDirectoryName(path);
 
         try
         {
-            var json = File.ReadAllText(result.FullPath);
+            var json = File.ReadAllText(path);
             _model = JsonSerializer.Deserialize<ThemeModel>(json);
 
             if (_model != null)
-                await DisplayAlert("Theme Loaded", $"Loaded {_model.DisplayName} with {_model.Wallpapers.Count} wallpapers.", "OK");
+                await DisplayAlert("Theme Loaded",
+                    $"Loaded {_model.DisplayName} with {_model.Wallpapers.Count} wallpapers.",
+                    "OK");
         }
         catch (Exception ex)
         {
