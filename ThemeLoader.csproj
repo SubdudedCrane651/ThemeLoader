@@ -21,8 +21,9 @@
 
   <ItemGroup>
     <!-- Include all XAML and C# files -->
-    <Compile Update="**\*.cs" />
+  <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" /> 
+ <Compile Update="**\*.cs" />
     <MauiXaml Update="**\*.xaml" />
   </ItemGroup>
-
+ 
 </Project>
