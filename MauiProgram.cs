@@ -1,24 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Maui; // Add this using directive
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting; // Add this using directive
+﻿using Microsoft.Maui;
+using Microsoft.Maui.Hosting;
+using ThemeLoader.Services;
 
-namespace ThemeLoader
+namespace ThemeLoader;
+
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
-        {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
 
-            return builder.Build();
-        }
+
+#if WINDOWS
+        builder.Services.AddSingleton<IFilePickerService, Platforms.Windows.FilePickerService>();
+#elif MACCATALYST
+        builder.Services.AddSingleton<IFilePickerService, Platforms.MacCatalyst.FilePickerService>();
+#endif
+        return builder.Build();
     }
 }
