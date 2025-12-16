@@ -16,6 +16,13 @@ public partial class MainPage : ContentPage
     int _index = 0;
     readonly IFilePickerService _filePicker;
 
+// MAUI needs this
+    public MainPage() : this(
+        Microsoft.Maui.Controls.Application.Current?.Handler?.MauiContext?.Services.GetService<IFilePickerService>()
+        ?? throw new InvalidOperationException("FilePickerService not registered"))
+    {
+    }
+
     public MainPage(IFilePickerService filePicker)
     {
         InitializeComponent();
