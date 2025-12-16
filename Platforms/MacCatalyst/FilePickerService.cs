@@ -12,31 +12,40 @@ public class FilePickerService : IFilePickerService
     {
         var tcs = new TaskCompletionSource<string?>();
 
-        // Replace UTType.Json.Identifier with the public identifier for JSON files
-        var picker = new UIDocumentPickerViewController(
-            allowedTypes ?? new string[] { "public.json" },
-            UIDocumentPickerMode.Import);
+        var allowed = (allowedTypes ?? Array.Empty<string>())
+                      .Select(e => e.Trim().ToLowerInvariant())
+                      .ToHashSet();
 
-        picker.DidPickDocument += (sender, e) =>
+        var controller = new UIDocumentPickerViewController(
+            new string[] { "public.data" }, // allow general files
+            UIDocumentPickerMode.Open);
+
+        controller.AllowsMultipleSelection = false;
+
+        controller.DidPickDocumentAtUrls += (sender, args) =>
         {
-            tcs.TrySetResult(e.Url?.Path);
+            var url = args.Urls?.FirstOrDefault();
+            if (url != null && url.IsFileUrl)
+            {
+                var path = url.Path;
+                if (allowed.Count == 0 || allowed.Contains(System.IO.Path.GetExtension(path).ToLowerInvariant()))
+                    tcs.TrySetResult(path);
+                else
+                    tcs.TrySetResult(null);
+            }
+            else
+            {
+                tcs.TrySetResult(null);
+            }
         };
 
-        picker.WasCancelled += (sender, e) =>
+        controller.WasCancelled += (sender, e) =>
         {
             tcs.TrySetResult(null);
         };
 
-        // Present from the active UIWindowScene
-        var root = UIApplication.SharedApplication
-            .ConnectedScenes
-            .OfType<UIWindowScene>()
-            .FirstOrDefault()?
-            .Windows
-            .FirstOrDefault(w => w.IsKeyWindow)?
-            .RootViewController;
-
-        root?.PresentViewController(picker, true, null);
+        var vc = UIApplication.SharedApplication.KeyWindow?.RootViewController;
+        vc?.PresentViewController(controller, true, null);
 
         return tcs.Task;
     }
